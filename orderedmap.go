@@ -106,6 +106,23 @@ func (o *OrderedMap) Values() []any {
 	return v
 }
 
+func (o *OrderedMap) Len() int {
+	return len(o.keys)
+}
+
+func (o *OrderedMap) GetValueAt(pos int) (any, bool) {
+	k := o.keys[pos]
+	val, ok := o.values[k]
+	return val, ok
+}
+
+func (o *OrderedMap) GetKeyAt(pos int) (string, bool) {
+	if pos > len(o.keys) {
+		return "", false
+	}
+	return o.keys[pos], true
+}
+
 // SortKeys sorts the map keys using the provided sort func.
 func (o *OrderedMap) SortKeys(sortFunc func(keys []string)) {
 	sortFunc(o.keys)
