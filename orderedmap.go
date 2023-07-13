@@ -66,6 +66,9 @@ func New() *OrderedMap {
 
 func (o *OrderedMap) Get(key string) (any, bool) {
 	val, ok := o.values[key]
+	if key == "" {
+		return nil, false
+	}
 	return val, ok
 }
 
@@ -104,6 +107,10 @@ func (o *OrderedMap) Values() []any {
 		v[i] = o.values[k]
 	}
 	return v
+}
+
+func (o *OrderedMap) KeysValues() map[string]any {
+	return o.values
 }
 
 func (o *OrderedMap) Len() int {
@@ -168,10 +175,6 @@ func (o OrderedMap) MarshalJSON() ([]byte, error) {
 }
 
 func (o *OrderedMap) UnmarshalJSON(b []byte) error {
-	// Ensure that there were no duplicates fields.  JSON should error on
-	// duplicates. "Last value wins" is bad practice.  See
-	// https://esdiscuss.org/topic/json-duplicate-keys and the Coze docs on
-	// duplicate JSON keys.
 	err := CheckDuplicate(json.NewDecoder(bytes.NewReader(b)))
 	if err != nil {
 		return err
@@ -315,8 +318,36 @@ func decodeSlice(dec *json.Decoder, s []any) error {
 // ErrJSONDuplicate allows applications to check for JSON duplicate error.
 type ErrJSONDuplicate error
 
-// CheckDuplicate checks for JSON duplicates. See notes on Marshal and the
-// README FAQ on duplicate fields.
+// CheckDuplicate checks for JSON duplicates on ingest (unmarshal).  Note that
+// Go maps and structs and Javascript objects (ES6) already require unique
+// JSON names.  See the Coze FAQ on duplicates.
+//
+// Duplicate JSON fields are a security issue that wasn't addressed by the
+// original spec that results in surprising behavior and is a source of bugs.
+// See the article, "[An Exploration of JSON Interoperability
+// Vulnerabilities](https://bishopfox.com/blog/json-interoperability-vulnerabilities)"
+// and control-f "duplicate".
+//
+// Until Go releases the planned revision to the JSON package (See
+// https://github.com/go-json-experiment/json), or adds support for erroring on
+// duplicates to the current package, this function is needed.
+//
+// After JSON was widely adopted, Douglas Crockford (JSON's inventor), tried to
+// fix this by updating JSON to define "must error on duplicates" as the correct
+// behavior,  but it was decided it was too late
+// (https://esdiscuss.org/topic/json-duplicate-keys).
+//
+// Although Douglas Crockford couldn't change the JSON spec to force
+// implementations to error on duplicate, his Java JSON implementation errors on
+// duplicates. Others implementations behaviors are `last-value-wins`, support
+// duplicate keys, or other non-standard behavior. The [JSON
+// RFC](https://datatracker.ietf.org/doc/html/rfc8259#section-4) states that
+// implementations should not allow duplicate keys.  It then notes the varying behavior
+// of existing implementations.
+//
+// Disallowing duplicates conforms to the small I-JSON RFC. The author of
+// I-JSON, Tim Bray, is also the author of current JSON specification (RFC
+// 8259).  See also https://github.com/json5/json5-spec/issues/38.
 func CheckDuplicate(d *json.Decoder) error {
 	t, err := d.Token()
 	if err != nil {

@@ -100,6 +100,20 @@ func TestOrderedMap(t *testing.T) {
 			t.Error("Values method", expectedValues[i], "!=", val)
 		}
 	}
+
+	// KeysValues method
+	kv := o.KeysValues()
+	ekv := map[string]any{
+		"number":  4, // 3 is overwritten
+		"string":  "x",
+		"strings": []string{"t", "u"},
+		"mixed":   []any{1, "1"},
+	}
+
+	if !reflect.DeepEqual(kv, ekv) {
+		t.Error("KeysValues method is incorrect")
+	}
+
 }
 
 func TestOrderedMapDelete(t *testing.T) {
