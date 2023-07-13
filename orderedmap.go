@@ -64,12 +64,8 @@ func New() *OrderedMap {
 	return &o
 }
 
-func (o *OrderedMap) Get(key string) (any, bool) {
-	val, ok := o.values[key]
-	if key == "" {
-		return nil, false
-	}
-	return val, ok
+func (o *OrderedMap) Get(key string) any {
+	return o.values[key]
 }
 
 func (o *OrderedMap) Set(key string, value any) {
@@ -117,17 +113,13 @@ func (o *OrderedMap) Len() int {
 	return len(o.keys)
 }
 
-func (o *OrderedMap) GetValueAt(pos int) (any, bool) {
+func (o *OrderedMap) GetValueAt(pos int) any {
 	k := o.keys[pos]
-	val, ok := o.values[k]
-	return val, ok
+	return o.values[k]
 }
 
-func (o *OrderedMap) GetKeyAt(pos int) (string, bool) {
-	if pos > len(o.keys) {
-		return "", false
-	}
-	return o.keys[pos], true
+func (o *OrderedMap) GetKeyAt(pos int) string {
+	return o.keys[pos]
 }
 
 // SortKeys sorts the map keys using the provided sort func.

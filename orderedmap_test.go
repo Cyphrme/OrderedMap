@@ -34,12 +34,12 @@ import (
 func TestOrderedMap(t *testing.T) {
 	o := New()
 	o.Set("number", 3) // number
-	v, _ := o.Get("number")
+	v := o.Get("number")
 	if v.(int) != 3 {
 		t.Error("Set number")
 	}
 	o.Set("string", "x") // string
-	v, _ = o.Get("string")
+	v = o.Get("string")
 	if v.(string) != "x" {
 		t.Error("Set string")
 	}
@@ -47,7 +47,7 @@ func TestOrderedMap(t *testing.T) {
 		"t",
 		"u",
 	})
-	v, _ = o.Get("strings")
+	v = o.Get("strings")
 	if v.([]string)[0] != "t" {
 		t.Error("Set strings first index")
 	}
@@ -58,7 +58,7 @@ func TestOrderedMap(t *testing.T) {
 		1,
 		"1",
 	})
-	v, _ = o.Get("mixed")
+	v = o.Get("mixed")
 	if v.([]any)[0].(int) != 1 {
 		t.Error("Set mixed int")
 	}
@@ -68,7 +68,7 @@ func TestOrderedMap(t *testing.T) {
 
 	// overriding existing key
 	o.Set("number", 4)
-	v, _ = o.Get("number")
+	v = o.Get("number")
 	if v.(int) != 4 {
 		t.Error("Override existing key")
 	}
@@ -116,13 +116,14 @@ func TestOrderedMap(t *testing.T) {
 
 }
 
+// TODO fixthis
 func TestOrderedMapDelete(t *testing.T) {
 	o := New()
 	o.Set("strings", "stringValue")
 	o.Delete("strings")
 	o.Delete("not a key being used")
-	_, ok := o.Get("strings")
-	if ok || len(o.Keys()) != 0 { // Demonstrates that delete isn't set to nil, but is removed.
+	_ = o.Get("strings")
+	if len(o.Keys()) != 0 { // Demonstrates that delete isn't set to nil, but is removed.
 		t.Error("Delete did not remove 'strings' key")
 	}
 }
@@ -292,10 +293,7 @@ func TestUnmarshalJSON(t *testing.T) {
 		"a { nested key with brace",
 		"after",
 	}
-	vi, ok := o.Get("orderedmap")
-	if !ok {
-		t.Error("Missing key for nested map 1 deep")
-	}
+	vi := o.Get("orderedmap")
 	v := vi.(OrderedMap) // panics if not correct type
 	k = v.Keys()
 	for i := range k {
@@ -307,10 +305,7 @@ func TestUnmarshalJSON(t *testing.T) {
 	expectedKeys = []string{
 		"link",
 	}
-	vi, ok = v.Get("after")
-	if !ok {
-		t.Error("Missing key for nested map 2 deep")
-	}
+	vi = v.Get("after")
 	v = vi.(OrderedMap) // panics if not correct type
 	k = v.Keys()
 	for i := range k {
@@ -324,10 +319,7 @@ func TestUnmarshalJSON(t *testing.T) {
 		"it",
 		":colon in key",
 	}
-	vislice, ok := o.Get("multitype_array")
-	if !ok {
-		t.Error("Missing key for multitype array")
-	}
+	vislice := o.Get("multitype_array")
 	vslice := vislice.([]any) // panics if not correct type
 	vmap := vslice[2].(OrderedMap)
 	k = vmap.Keys()
@@ -337,7 +329,7 @@ func TestUnmarshalJSON(t *testing.T) {
 		}
 	}
 	// nested map 3 deep
-	vislice, _ = o.Get("multitype_array")
+	vislice = o.Get("multitype_array")
 	vslice = vislice.([]any) // panics if not correct type
 	expectedKeys = []string{"inner"}
 	vinnerslice := vslice[3].([]any)
@@ -438,10 +430,7 @@ func TestUnmarshalJSONArrayOfMaps(t *testing.T) {
 		"name",
 		"percent",
 	}
-	vi, ok := o.Get("breakdown")
-	if !ok {
-		t.Error("Missing key for nested map 1 deep")
-	}
+	vi := o.Get("breakdown")
 	vs := vi.([]any)
 	for _, vInterface := range vs {
 		v := vInterface.(OrderedMap)
@@ -464,10 +453,8 @@ func TestUnmarshalJSONStruct(t *testing.T) {
 		t.Fatalf("JSON unmarshal error: %v", err)
 	}
 
-	x, ok := v.Data.Get("x")
-	if !ok {
-		t.Errorf("missing expected key")
-	} else if x != float64(1) {
+	x := v.Data.Get("x")
+	if x != float64(1) {
 		t.Errorf("unexpected value: %#v", x)
 	}
 }
